@@ -12,13 +12,12 @@ files
         = true,
     },
   },
-  config | Schema
-    = {
-      direnv,
-      files =
-        if direnv.enable then
-          {
-            ".envrc".content = m%"
+  config | Schema = {
+    direnv,
+    files =
+      if direnv.enable then
+        {
+          ".envrc".content = m%"
             if ! has nix_direnv_version || ! nix_direnv_version 3.0.6; then
               source_url "https://raw.githubusercontent.com/nix-community/nix-direnv/3.0.6/direnvrc" "sha256-RYcUJaRMf8oF5LznDrlCXbkOQrywm0HDv1VjYGaJGdM="
             fi
@@ -26,8 +25,8 @@ files
             source_env_if_exists ".envrc.private"
             use flake
           "%,
-          }
-        else
-          {},
-    },
+        }
+      else
+        {},
+  },
 }

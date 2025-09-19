@@ -16,34 +16,30 @@ in
 
 {
   get_all_defs | Effect (Array PackageDef) = [ import "pkgs/hello-world.ncl"],
-  defs_with_name | Array PackageDef -> { _ : PackageDef }
-    = fun _pkgs =>
-      {
-        hello-world = import "pkgs/hello-world.ncl",
-      },
-  combine | { _ : PackageDef } -> { _ : Package }
-    = fun pkgs =>
-      # Bind the derivation field to the others. Using merging and not a contract
-      # to avoid redoing the computation again and again
-      let base = record.map (fun _k pkg => pkgs & drv_builder) in
+  defs_with_name | Array PackageDef -> { _ : PackageDef } = fun _pkgs =>
+    {
+      hello-world = import "pkgs/hello-world.ncl",
+    },
+  combine | { _ : PackageDef } -> { _ : Package } = fun pkgs =>
+    # Bind the derivation field to the others. Using merging and not a contract
+    # to avoid redoing the computation again and again
+    let base = record.map (fun _k pkg => pkgs & drv_builder) in
 
-      # bind the inputs and build_inputs
-      let rec res =
-        record.map
-          (
-            fun _k pkg =>
-              pkg
-              & {
-                inputs = record.project pkg.inputs res,
-                build_inputs = record.project pkg.build_inputs res,
-              }
-          )
-          base
-      in
-      res,
-  make | Effect { _ : Derivation }
-    =
-      get_all_defs
-      |> defs_with_name
-      |> combine,
+    # bind the inputs and build_inputs
+    let rec res =
+      record.map
+        (fun _k pkg =>
+          pkg
+          & {
+            inputs = record.project pkg.inputs res,
+            build_inputs = record.project pkg.build_inputs res,
+          }
+        )
+        base
+    in
+    res,
+  make | Effect { _ : Derivation } =
+    get_all_defs
+    |> defs_with_name
+    |> combine,
 }

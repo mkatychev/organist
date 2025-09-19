@@ -16,19 +16,18 @@ let ConfigEntry = {
 }
 in
 let Config = { _ : ConfigEntry } in
-let showConfigEntry | String -> ConfigEntry -> String
-  = fun section_name entry =>
-    let content =
-      entry
-      |> std.record.map (fun key value => "%{key} = %{std.to_string value}")
-      |> std.record.values
-      |> std.string.join "\n"
-    in
-    m%"
+let showConfigEntry | String -> ConfigEntry -> String = fun section_name entry =>
+  let content =
+    entry
+    |> std.record.map (fun key value => "%{key} = %{std.to_string value}")
+    |> std.record.values
+    |> std.string.join "\n"
+  in
+  m%"
   [%{section_name}]
   %{content}
   "%
-  in
+in
 let generate
   | Bool -> {
     _ : ConfigEntry
@@ -40,7 +39,7 @@ let generate
     %{std.record.map showConfigEntry cfg |> std.record.values |> std.string.join "\n\n"}
 
     "%
-  in
+in
 let EditorConfigSchema = {
   is_root
     | doc "Whether to stop searching for other editorconfig files above"
@@ -81,17 +80,16 @@ files
       | default
       = {},
   },
-  config | Schema
-    = {
-      editorconfig,
-      files =
-        if editorconfig.sections != {} then
-          {
-            ".editorconfig" = {
-              content = generate editorconfig.is_root editorconfig.sections,
-            }
+  config | Schema = {
+    editorconfig,
+    files =
+      if editorconfig.sections != {} then
+        {
+          ".editorconfig" = {
+            content = generate editorconfig.is_root editorconfig.sections,
           }
-        else
-          {},
-    },
+        }
+      else
+        {},
+  },
 }

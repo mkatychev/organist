@@ -5,16 +5,15 @@ organist.OrganistExpression
 & organist.tools.direnv
 & {
   Schema,
-  config | Schema
-    = {
-      shells = organist.shells.Bash,
+  config | Schema = {
+    shells = organist.shells.Bash,
 
-      shells.build = {
-        packages = {},
-      },
-
-      shells.dev = {
-        packages.direnv = organist.import_nix "nixpkgs#direnv"
-      },
+    shells.build = {
+      packages = {},
     },
+
+    shells.dev = {
+      packages.direnv = organist.import_nix "nixpkgs#direnv"
+    },
+  },
 } | organist.modules.T

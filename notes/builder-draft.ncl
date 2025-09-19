@@ -43,13 +43,11 @@
       build_inputs | default = {},
       install_phase | Str | default = "",
       build_phase | Str | default = "",
-      build_script | Str
-        =
-          m%"
+      build_script | Str =
+        m%"
             %{build_phase}
             %{install_phase}
-          "%
-            m,
+          "% m,
       ..
     },
 

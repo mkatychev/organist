@@ -34,8 +34,7 @@ ormoluFromHls = fun hls =>
           noOrmoluFound
     "%,
     args = hls,
-  }
-in
+  } in
 
 Bash
 & {

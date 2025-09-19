@@ -65,11 +65,10 @@ let lockfile = import "lockfile.ncl" in
           | FlakeOutputs
           = {},
       },
-      config | Schema
-        = {
-          shells,
-          flake.devShells = shells,
-        },
+      config | Schema = {
+        shells,
+        flake.devShells = shells,
+      },
     }
     & filegen
     & lockfile

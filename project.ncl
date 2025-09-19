@@ -5,59 +5,57 @@ let import_nix = organist.nix.import_nix in
 organist.OrganistExpression
 & {
   Schema,
-  config | Schema
-    = {
+  config | Schema = {
 
-      shells =
-        organist.shells.Bash
-        & {
-          build.packages = {
-            nickel = import_nix "nixpkgs#nickel",
-            parallel = import_nix "nixpkgs#parallel",
-            gnused = import_nix "nixpkgs#gnused",
-          },
+    shells =
+      organist.shells.Bash
+      & {
+        build.packages = {
+          nickel = import_nix "nixpkgs#nickel",
+          parallel = import_nix "nixpkgs#parallel",
+          gnused = import_nix "nixpkgs#gnused",
         },
-
-      flake.apps.run-test =
-        let testScript | organist.nix.builders.ShellApplication
-          = {
-            name = "run-test.sh",
-            content.file = organist.nix.builtins.import_file "run-test.sh",
-            runtime_inputs = {
-              nickel = import_nix "nixpkgs#nickel",
-              parallel = import_nix "nixpkgs#parallel",
-              gnused = import_nix "nixpkgs#gnused",
-            },
-          }
-          in
-        {
-          type = "app",
-          program | organist.nix.nix_string.NixString = nix-s%"%{testScript}/bin/run-test.sh"%
-        },
-
-      flake.packages = {
-        # Re-exported to make it easy for downstream to depend on them
-        nickel = import_nix "nixpkgs#nickel",
-        nls = import_nix "nixpkgs#nls",
       },
 
-      flake.checks
-        | { _ | organist.nix.builders.NixpkgsPkg }
-        = {
-          alejandra = {
-            name = "check-alejandra",
-            version = "0.0",
-            env.buildCommand = nix-s%"
+    flake.apps.run-test =
+      let testScript | organist.nix.builders.ShellApplication = {
+        name = "run-test.sh",
+        content.file = organist.nix.builtins.import_file "run-test.sh",
+        runtime_inputs = {
+          nickel = import_nix "nixpkgs#nickel",
+          parallel = import_nix "nixpkgs#parallel",
+          gnused = import_nix "nixpkgs#gnused",
+        },
+      }
+      in
+      {
+        type = "app",
+        program | organist.nix.nix_string.NixString = nix-s%"%{testScript}/bin/run-test.sh"%
+      },
+
+    flake.packages = {
+      # Re-exported to make it easy for downstream to depend on them
+      nickel = import_nix "nixpkgs#nickel",
+      nls = import_nix "nixpkgs#nls",
+    },
+
+    flake.checks
+      | { _ | organist.nix.builders.NixpkgsPkg }
+      = {
+        alejandra = {
+          name = "check-alejandra",
+          version = "0.0",
+          env.buildCommand = nix-s%"
           %{import_nix "nixpkgs#alejandra"}/bin/alejandra --check %{import_nix "self"}
           touch $out
         "%,
-          },
+        },
 
-          nickel-format = {
-            name = "check-nickel-format",
-            version = "0.0",
-            env.buildInputs.nickel = import_nix "nixpkgs#nickel",
-            env.buildCommand = nix-s%"
+        nickel-format = {
+          name = "check-nickel-format",
+          version = "0.0",
+          env.buildInputs.nickel = import_nix "nixpkgs#nickel",
+          env.buildCommand = nix-s%"
           cd %{import_nix "self"}
           failed=""
           for f in $(find . -name future -prune -or -name '*.ncl' -print); do
@@ -71,38 +69,38 @@ organist.OrganistExpression
           fi
           touch $out
         "%,
-          },
+        },
 
-          lsp = {
-            name = "organist-lsp-integration",
-            version = "0.0",
-            env.buildInputs = {
-              nls = import_nix "nixpkgs#nls",
-              python3 = import_nix "nixpkgs#python3",
-              pygls = import_nix "nixpkgs#python3Packages.pygls",
-              pytest = import_nix "nixpkgs#python3Packages.pytest",
-              pytest-asyncio = import_nix "nixpkgs#python3Packages.pytest-asyncio",
-            },
-            env = {
-              src = import_nix "self",
-              phases = ["unpackPhase", "testPhase", "installPhase"],
-              testPhase = nix-s%"
+        lsp = {
+          name = "organist-lsp-integration",
+          version = "0.0",
+          env.buildInputs = {
+            nls = import_nix "nixpkgs#nls",
+            python3 = import_nix "nixpkgs#python3",
+            pygls = import_nix "nixpkgs#python3Packages.pygls",
+            pytest = import_nix "nixpkgs#python3Packages.pytest",
+            pytest-asyncio = import_nix "nixpkgs#python3Packages.pytest-asyncio",
+          },
+          env = {
+            src = import_nix "self",
+            phases = ["unpackPhase", "testPhase", "installPhase"],
+            testPhase = nix-s%"
                   cd tests/lsp
                   pytest | tee $out
                 "%,
-              installPhase = "touch $out",
-            },
+            installPhase = "touch $out",
           },
         },
+      },
 
-      flake.checks = import "tests/main.ncl",
+    flake.checks = import "tests/main.ncl",
 
-      files.".gitignore".materialisation_method = 'Copy,
-      files.".gitignore".content = m%"
+    files.".gitignore".materialisation_method = 'Copy,
+    files.".gitignore".content = m%"
     # This file is generated by Organist, please don't edit directly
     /examples/*/result
     /result
 
   "%,
-    },
+  },
 } | organist.modules.T

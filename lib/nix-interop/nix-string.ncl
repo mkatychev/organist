@@ -50,8 +50,7 @@ let mk_nix_string = fun fs =>
 in
 {
 
-  NixStringFragment | doc "A fragment of a Nix string (or a string with context). See `NixString`"
-    = std.contract.from_predicate predicate.is_string_fragment,
+  NixStringFragment | doc "A fragment of a Nix string (or a string with context). See `NixString`" = std.contract.from_predicate predicate.is_string_fragment,
 
   NixSymbolicString
     | doc m%"
@@ -146,21 +145,18 @@ in
         mk_nix_string [value]
       else
         let { fragments, .. } = std.contract.apply NixSymbolicString label value in
-        mk_nix_string
-          (
-            std.array.flat_map
-              (fun elt => elt.fragments)
-              fragments
-          ),
-
-  join | NixString -> Array NixString -> NixString
-    = fun sep strings =>
-      mk_nix_string
-        (
-          std.array.map
+        mk_nix_string (
+          std.array.flat_map
             (fun elt => elt.fragments)
-            strings
-          |> std.array.intersperse sep.fragments
-          |> std.array.flatten
+            fragments
         ),
+
+  join | NixString -> Array NixString -> NixString = fun sep strings =>
+    mk_nix_string (
+      std.array.map
+        (fun elt => elt.fragments)
+        strings
+      |> std.array.intersperse sep.fragments
+      |> std.array.flatten
+    ),
 }

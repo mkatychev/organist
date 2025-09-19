@@ -4,17 +4,16 @@ let organist = inputs.organist in
 organist.OrganistExpression
 & {
   Schema,
-  config | Schema
-    = {
-      shells = organist.shells.Bash,
+  config | Schema = {
+    shells = organist.shells.Bash,
 
-      shells.build = {
-        packages = {},
-      },
-
-      shells.dev = {
-        packages.hello = organist.import_nix "nixpkgs#hello",
-      },
+    shells.build = {
+      packages = {},
     },
+
+    shells.dev = {
+      packages.hello = organist.import_nix "nixpkgs#hello",
+    },
+  },
 }
   | organist.modules.T

@@ -1,21 +1,17 @@
 let nix = import "./nix-interop/nix.ncl" in
 let RelativePath =
-  std.contract.from_predicate
-    (
-      fun x =>
-        x
-        |> std.string.characters
-        |> std.array.first != "/"
-    )
+  std.contract.from_predicate (fun x =>
+    x
+    |> std.string.characters
+    |> std.array.first != "/"
+  )
 in
 let NoParentTraversal =
-  std.contract.from_predicate
-    (
-      fun x =>
-        x
-        |> std.string.split "/"
-        |> std.array.all ((!=) "..")
-    )
+  std.contract.from_predicate (fun x =>
+    x
+    |> std.string.split "/"
+    |> std.array.all ((!=) "..")
+  )
 in
 let File = {
   target
@@ -62,10 +58,8 @@ let NormaliseTargets = fun label files =>
   files
   |> std.record.map (fun name file_descr => file_descr & { target | default = name })
 in
-let regenerate_files | Files -> nix.derivation.Derivation
-  = fun files_to_generate =>
-    let regenerate_function | String
-      = m%"
+let regenerate_files | Files -> nix.derivation.Derivation = fun files_to_generate =>
+  let regenerate_function | String = m%"
         regenerate_function () {
           COPY_COMMAND="$1"
           SOURCE="$2"
@@ -82,24 +76,22 @@ let regenerate_files | Files -> nix.derivation.Derivation
           fi
         }
       "%
-      in
-    let regnerate_one | String -> File -> nix.nix_string.NixString
-      = fun key file_descr =>
-        let copy_command =
-          match {
-            'Symlink => "ln -s",
-            'Copy => "cp",
-          }
-            file_descr.materialisation_method
-        in
-        let shell_escape = fun path =>
-          path
-          |> std.string.replace "\\" "\\\\"
-          |> std.string.replace m%"'"% m%"\'"%
-        in
-        nix-s%"regenerate_function '%{copy_command}' '%{file_descr.file}' $'%{shell_escape file_descr.target}'"%
-      in
-    let regenerate_files = nix-s%"
+  in
+  let regnerate_one | String -> File -> nix.nix_string.NixString = fun key file_descr =>
+    let copy_command =
+      match {
+        'Symlink => "ln -s",
+        'Copy => "cp",
+      } file_descr.materialisation_method
+    in
+    let shell_escape = fun path =>
+      path
+      |> std.string.replace "\\" "\\\\"
+      |> std.string.replace m%"'"% m%"\'"%
+    in
+    nix-s%"regenerate_function '%{copy_command}' '%{file_descr.file}' $'%{shell_escape file_descr.target}'"%
+  in
+  let regenerate_files = nix-s%"
       %{regenerate_function}
       %{
         files_to_generate
@@ -108,13 +100,13 @@ let regenerate_files | Files -> nix.derivation.Derivation
         |> nix.nix_string.join "\n"
       }
     "%
-    in
-    {
-      name = "regenerate-files",
-      content.text = regenerate_files,
-    }
-      | nix.builders.ShellApplication
   in
+  {
+    name = "regenerate-files",
+    content.text = regenerate_files,
+  }
+    | nix.builders.ShellApplication
+in
 {
   Schema = {
     files
@@ -135,21 +127,20 @@ let regenerate_files | Files -> nix.derivation.Derivation
     flake.apps, # Forward declaration. Not great but would need some refactor to fix
     shells,
   },
-  config | Schema
-    = {
-      files,
-      filegen_hook,
-      shells,
-      flake.apps.regenerate-files.program = nix-s%"%{regenerate_files files}/bin/regenerate-files"%,
+  config | Schema = {
+    files,
+    filegen_hook,
+    shells,
+    flake.apps.regenerate-files.program = nix-s%"%{regenerate_files files}/bin/regenerate-files"%,
 
-      shells.build.hooks =
-        if filegen_hook.enable then
-          {
-            filegen_hook = nix-s%"
+    shells.build.hooks =
+      if filegen_hook.enable then
+        {
+          filegen_hook = nix-s%"
               %{regenerate_files files}/bin/regenerate-files
             "%
-          }
-        else
-          {},
-    },
+        }
+      else
+        {},
+  },
 }

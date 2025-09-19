@@ -8,21 +8,19 @@ let RustShell = {
     | doc "The rust channel"
     | default
     = 'stable,
-  extraTargets | doc "Extra targets to install, for cross-compilation"
-    = Targets,
+  extraTargets | doc "Extra targets to install, for cross-compilation" = Targets,
 
-  components | doc "Rust components to install"
-    = {
-      rustc | default = true,
-      cargo | default = true,
-      rust-std | default = true,
-      rust-docs | default = false,
-      rustfmt | default = false,
-      rust-analyzer | default = false,
-      clippy | default = false,
-      miri | default = false,
-      rust-src | default = false,
-    },
+  components | doc "Rust components to install" = {
+    rustc | default = true,
+    cargo | default = true,
+    rust-std | default = true,
+    rust-docs | default = false,
+    rustfmt | default = false,
+    rust-analyzer | default = false,
+    clippy | default = false,
+    miri | default = false,
+    rust-src | default = false,
+  },
 
   packages.rustc =
     # Maybe we should default to "complete" instead of "latest"? Tier 2 targets only

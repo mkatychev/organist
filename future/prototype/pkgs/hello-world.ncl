@@ -6,6 +6,5 @@ let { BinShBuilder, .. } = import "../builders.ncl" in
   build_script =
     m%"
     echo "Hello, world" > $out
-  "%
-      m,
+  "% m,
 } | BinShBuilder

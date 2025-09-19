@@ -89,10 +89,9 @@ let NixString = nix_string.NixString in
       ..
     },
 
-  Params | doc "The parameters provided to the Nickel expression"
-    = {
-      system | System,
-    },
+  Params | doc "The parameters provided to the Nickel expression" = {
+    system | System,
+  },
 
   InputPath
     | doc " The path of a package in an input (usually nixpkgs)"
